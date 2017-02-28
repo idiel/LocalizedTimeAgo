@@ -66,6 +66,43 @@ public extension Date {
         return calendar.dateComponents(unitFlags, from: self, to: now)
     }
 
+    private var isThisYear: Bool {
+        guard let theYear = calendar.dateComponents(Set<Calendar.Component>([.year]), from: self).year,
+            let thisYear = calendar.dateComponents(Set<Calendar.Component>([.year]), from: Date()).year else { return false }
+        return theYear == thisYear
+    }
+    
+    private var isIn24Hours: Bool {
+        return fabs(self.timeIntervalSinceNow / 60 / 60) < 24
+    }
+    
+    public func commentTimeAgo() -> String {
+        if !self.isThisYear {
+            let formatter = DateFormatter()
+            formatter.dateFormat = DateFormatter.dateFormat(fromTemplate: "yyyydMMM", options: 0, locale: Locale.current)
+            
+            let timeFormatter = DateFormatter()
+            timeFormatter.timeStyle = .short
+            return "\(formatter.string(from: self)) \(timeFormatter.string(from: self))"
+        
+        } else if !self.isIn24Hours {
+            let formatter = DateFormatter()
+            formatter.dateFormat = DateFormatter.dateFormat(fromTemplate: "dMMM", options: 0, locale: Locale.current)
+            
+            let timeFormatter = DateFormatter()
+            timeFormatter.timeStyle = .short
+            return "\(formatter.string(from: self)) \(timeFormatter.string(from: self))"
+            
+        } else if let hour = components.hour, hour > 0 {
+            if hour >= 2 { return String(format: "%d hours ago".adjustedKey(forValue: hour).localized(), hour) }
+            return "An hour ago".localized()
+        } else if let minute = components.minute, minute > 0 {
+            if minute >= 2 { return String(format: "%d minutes ago".adjustedKey(forValue: minute).localized(), minute) }
+            return "A minute ago".localized()
+        }
+        return "Just now".localized()
+    }
+    
     public func timeAgo(numericDates: Bool = false, numericTimes: Bool = false) -> String {
         if let year = components.year, year > 0 {
             if year >= 2 { return String(format: "%d years ago".adjustedKey(forValue: year).localized(), year) }
