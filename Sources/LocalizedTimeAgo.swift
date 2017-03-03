@@ -76,6 +76,19 @@ public extension Date {
         return fabs(self.timeIntervalSinceNow / 60 / 60) < 24
     }
     
+    public func chatTimeAgo() -> String {
+        let formatter = DateFormatter()
+        if !self.isThisYear {
+            formatter.dateFormat = DateFormatter.dateFormat(fromTemplate: "yyyydMMM", options: 0, locale: Locale.current)
+        } else if !self.isIn24Hours {
+            formatter.dateFormat = DateFormatter.dateFormat(fromTemplate: "dMMM", options: 0, locale: Locale.current)
+        } else {
+            formatter.timeStyle = .short
+        }
+        
+        return formatter.string(from: self)
+    }
+    
     public func commentTimeAgo() -> String {
         if !self.isThisYear {
             let formatter = DateFormatter()
